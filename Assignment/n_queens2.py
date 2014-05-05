@@ -1,12 +1,10 @@
+#Author - Myles Cullen
+
 import pycosat
 import sys
-import collections
 
-def getRange(m,n,step):
-	return range(m,n,step)
 
 def solve(n):
-	#n = 5
 	y =[]
 	#rows
 	for i in range (1,(n*n)+1,n):
@@ -26,20 +24,23 @@ def solve(n):
 
 	#replace numbers with something more meaningful
 	result = changeFormat(result,n)
-	#return a boolean list indicating unique solutions
+	#return a boolean list indicating which solutions are unique 
 	isValid = returnWithoutRotations(result)
-	
+	#figure out how many unique solutions there are
 	NValidSol = 0
 	for i in range(0,len(result)): 
 		if isValid[i] :
 			NValidSol += 1
+	#print out all the unique solutions
+	for i in range(0,len(result)):
+		if(isValid[i]):
+			printSol(result[i])
 
-	#for i in range(0,len(result)):
-	#	if(isValid[i]):
-#			printSol(result[i])
+	print("There are " , NValidSol ,  " unique solutions with rotations and reflections")
 
-	print("There are " , NValidSol ,  " unique solutions with rotations")
-
+#-------------------------------------
+#returns a list of booleans indicating whether a solution is unique or not
+#-------------------------------------
 def returnWithoutRotations(result):
 
 	#list of booleans for rotations
@@ -56,23 +57,22 @@ def returnWithoutRotations(result):
 				newSol =  result[k]
 			else:
 				newSol =  returnRotatedSol(n,newSol)
-			print("rotated solution")
-			printSol(newSol)
+			#test rotated one against the others
 			for i in range(1+k,len(result)):
 				if isValid[i]:
 					if(isListEqual(newSol,result[i],n)):
 						isValid[i] = False
-			#check for reflections
+			##test rotated one against the others
 			reflectSol =  returnReflectedSol(n,newSol)
-			print("reflected solution")
-			printSol(reflectSol)
 			for i in range(1+k,len(result)):
 				if isValid[i]:
 					if(isListEqual(reflectSol,result[i],n)):
 						isValid[i] = False
 
 	return isValid
-
+#-------------------------------------
+#changes the format of the orginal list to use chars instead
+#-------------------------------------
 def changeFormat(result,n):
 	index = 0
 	for i in result:
@@ -84,15 +84,18 @@ def changeFormat(result,n):
 		index += 1
 
 	return result
-				  	
+#-------------------------------------
+#checks to see if 2 lists are equal				  	
+#-------------------------------------
 def isListEqual(a,b,n):	
 	for i in range(0,n*n):
 		if(a[i] != b[i]):
 			return False
 
 	return True
-
+#-------------------------------------
 #return diagonal clauses
+#-------------------------------------
 def diagonal(m,n):
 	
 	clauses = []
@@ -115,6 +118,23 @@ def diagonal(m,n):
 	
 	return clauses
 
+#-------------------------------------
+#helper function for creating clauses
+#-------------------------------------
+def makeNegative(v1,v2):
+	return [-v1,-v2]
+
+#-------------------------------------
+# function for printing out solutions
+#-------------------------------------
+def printSol(sol):
+	for i in range(0,n*n,n):
+			print sol[i:i+n]
+	print ' '
+
+#-------------------------------------
+#function for creating both vertical and horizontal clauses 
+#-------------------------------------
 def vertical(iterator,diag=False):
 	clauses = []
 	intermed =[]
@@ -129,57 +149,9 @@ def vertical(iterator,diag=False):
 			if i < j:
 				clauses.append(makeNegative(i,j))
 	return clauses
-
-def makeNegative(v1,v2):
-	return [-v1,-v2]
-
-def printSol(sol):
-	for i in range(0,n*n,n):
-			print sol[i:i+n]
-	print ' '
-
-def testForUniqueSolutions(n,sol):
-	result = []
-	newSol = []
-	for i in range(0,n):
-		result.append([(n*n)-n-j+i  for j  in range(0,n*n,n)])
-
-	printSol(sol)
-	for i in range(n-1):
-		for cl in vertical([n*j+(n-(i+j)) for j in range(n - i)]):
-			clauses.append(cl)		
-	
-	for i in range(1,n-1):
-		for cl in vertical([n*(j+i)+(n-j) for j in range(n - i)]):
-			clauses.append(cl)
-	
-	return clauses
-
-#clauses for vertical and horizontal 
-def vertical(iterator,diag=False):
-	clauses = []
-	intermed =[]
-	if diag:
-		for i in iterator:
-			intermed.append(i)
-	
-		clauses.append(intermed)
-
-	for i in iterator:
-		for j in iterator:
-			if i < j:
-				clauses.append(makeNegative(i,j))
-	return clauses
-
-def makeNegative(v1,v2):
-	return [-v1,-v2]
-
-#print out the solution
-def printSol(sol):
-	for i in range(0,n*n,n):
-			print sol[i:i+n]
-	print ' '
-
+#-------------------------------------
+#returns a rotated solution
+#-------------------------------------
 def returnRotatedSol(n,sol):
 	result = []
 	newSol = []
@@ -193,7 +165,9 @@ def returnRotatedSol(n,sol):
 			newSol.append(sol[j])	
 
 	return newSol
-
+#-------------------------------------
+#returns a reflected solution
+#-------------------------------------
 def returnReflectedSol(n,sol):
 	result = []
 	newSol = []
